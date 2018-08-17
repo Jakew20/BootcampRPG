@@ -18,6 +18,7 @@ namespace RPG
             
             Input();
             Console.WriteLine("\nName: " + YourChar.Name + "\n" + "Class: " + YourChar.Type + "\n"+  "Health: " + YourChar.MaxHp + "\n" + "Mana: " + YourChar.Mana  + "\n" + "Attack: " + YourChar.Attack  + "\n" + "Intellect: " + YourChar.intellect);
+            Console.ReadKey();
             FightDecide();
         }
 
@@ -47,6 +48,9 @@ namespace RPG
                     break;
                 case "4":
                     newChar = Priest.Type;
+                    break;
+                default:
+                    ChooseChar(input, name, newChar);
                     break;
             }
             return newChar;
@@ -165,11 +169,15 @@ namespace RPG
                 case "p":
                     if (YourChar.Potions.RevivePotionCount == 1 || YourChar.Potions.ManaPotionCount > 0 ||  YourChar.Potions.HealthPotionCount > 0)
                     {
-                        YourChar.Potions.UsePotion();
-                        damage();
-                        statCheck();
-                        DisplayAllStats();
+                        if (YourChar.Potions.UsePotion() != "R")
+                        {
+                            damage();
+                            statCheck();
+                            DisplayAllStats();
+                            FightDecide();
+                        }
                         FightDecide();
+                       
                     }
                     else
                     {
@@ -218,7 +226,9 @@ namespace RPG
                 }
                 else
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine(  Enemy.Type + " dodged your attack");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 
                
@@ -233,7 +243,9 @@ namespace RPG
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("You dodged the " + Enemy.Type + "'s attack");
+                Console.ForegroundColor = ConsoleColor.White;
             }
             Console.ReadKey();
             ClearScreen();
@@ -362,6 +374,8 @@ namespace RPG
                     Enemy.Attack = EvilTurtle.Attack;
                     Enemy.crit  = EvilTurtle.crit;
                     Enemy.dodge = EvilTurtle.dodge;
+                    Enemy.Gold = EvilTurtle.Gold;
+                    Enemy.EXP = EvilTurtle.EXP;
                     break;
                 case "Barbarian":
                     Enemy.Type = type;
@@ -370,6 +384,8 @@ namespace RPG
                     Enemy.Attack = Barbarian.Attack;
                     Enemy.crit = Barbarian.crit;
                     Enemy.dodge = Barbarian.dodge;
+                    Enemy.Gold = Barbarian.Gold;
+                    Enemy.EXP = Barbarian.EXP;
                     break;
                 case "Rabid Dog":
                     Enemy.Type = type;
@@ -378,6 +394,8 @@ namespace RPG
                     Enemy.Attack = Rabid_Dog.Attack;
                     Enemy.crit = Rabid_Dog.crit;
                     Enemy.dodge = Rabid_Dog.dodge;
+                    Enemy.Gold = Rabid_Dog.Gold;
+                    Enemy.EXP = Rabid_Dog.EXP;
                     break;
                 case "Bandit":
                     Enemy.Type = type;
@@ -386,11 +404,14 @@ namespace RPG
                     Enemy.Attack = Bandit.Attack;
                     Enemy.crit = Bandit.crit;
                     Enemy.dodge = Bandit.dodge;
+                    Enemy.Gold = Bandit.Gold;
+                    Enemy.EXP = Bandit.EXP;
                     break;
                 default:
                     break;
             }
-            Console.WriteLine("\nYou encounter the " + Enemy.Type);
+            Console.WriteLine("You encounter a {0}", Enemy.Type);
+            DisplayAllStats();
         }
 
         public static void run()
@@ -451,8 +472,10 @@ namespace RPG
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 YourChar.CurrentHP -= attack;
                 Console.WriteLine("You were hit for " + attack);
+                Console.ForegroundColor = ConsoleColor.White;
             }
         }
 
@@ -463,7 +486,14 @@ namespace RPG
             GoldAddition();
             Random rnd = new Random();
             int Ran = rnd.Next(3, 6);
-            Console.WriteLine("You win!");
+            ClearScreen();
+            Console.ForegroundColor = ConsoleColor.Cyan;
+            if (YourChar.CurrentEXP >= YourChar.EXPtoLevel)
+            {
+                LevelUp();
+            }
+            VictoryMessage();
+            Console.ForegroundColor = ConsoleColor.White;
             YourChar.turncounter = 1;
             YourChar.FightCount += 1;
             Console.ReadKey();
@@ -489,10 +519,17 @@ namespace RPG
             {
                 YourChar.CurrentHP = YourChar.Potions.ReviveValue;
                 YourChar.Potions.RevivePotionCount -= 1;
+                Console.WriteLine("You have been revived by your potion of Revive");
+                Console.ReadKey();
                 FightDecide();
             }
+            ClearScreen();
             Console.WriteLine("You Loss");
             Console.ReadKey();
+            ClearScreen();
+            Input();
+            Console.WriteLine("\nName: " + YourChar.Name + "\n" + "Class: " + YourChar.Type + "\n" + "Health: " + YourChar.MaxHp + "\n" + "Mana: " + YourChar.Mana + "\n" + "Attack: " + YourChar.Attack + "\n" + "Intellect: " + YourChar.intellect);
+            FightDecide();
         }
 
         public static bool YourCharDodge()
@@ -558,6 +595,19 @@ namespace RPG
                     Console.ReadKey();
                     break;
             }
+        }
+
+        public static void LevelUp()
+        {
+            Console.WriteLine("You have leveled up!");
+        }
+
+        public static void VictoryMessage()
+        {
+            Console.WriteLine("You win!");
+            Console.WriteLine("You have recieved {0} Gold for winning", Enemy.Gold);
+            Console.WriteLine("You gained {1} experience from killing the {0}", Enemy.Type, Enemy.EXP);
+            Console.WriteLine("You need " + (YourChar.EXPtoLevel - (YourChar.CurrentEXP += Enemy.EXP)) + " to increase to level " + (YourChar.Level + 1));
         }
     }
 }

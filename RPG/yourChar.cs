@@ -10,6 +10,9 @@ namespace RPG
     {
         public static string Type;
         public static string Name;
+        public static int Level = 1;
+        public static int CurrentEXP;
+        public static int EXPtoLevel = 100;
         public static decimal MaxHp;
         public static decimal CurrentHP;
         public static decimal Mana;
@@ -88,14 +91,15 @@ namespace RPG
             public static int RevivePotionCount = 0;
 
             public static int HealthValue = 75;
-            public static int ManaValue = 50;
+            public static int ManaValue = 63;
             public static decimal ReviveValue = MaxHp/2;
 
-            public static void UsePotion()
+            public static string UsePotion()
             {
                 Console.WriteLine("Which Potion should be used?\n");
                 Console.WriteLine("Health for " + HealthValue + " Press H");
                 Console.WriteLine("Mana for "  + ManaValue + " Press M");
+                Console.WriteLine("Press B to go back");
                 var input = Console.ReadLine();
                 switch (input.ToUpper())
                 {
@@ -105,10 +109,13 @@ namespace RPG
                     case "M":
                         Mana += ManaValue;
                         break;
+                    case "R":
+                        break;
                     default:
                         UsePotion();
                         break;
                 }
+                return input;
             }
             public static void BuyHealthPotion()
             {
@@ -185,13 +192,17 @@ namespace RPG
                 
                 if (intellect == 0)
                 {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     attack = (Attack * 2) + RandomDamageRoll() * 2;
                     Console.WriteLine("Critical hit!");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 else if (intellect > 0)
                 {
+                    Console.ForegroundColor = ConsoleColor.Yellow;
                     attack = (intellect * 2) + RandomDamageRoll() * 2;
                     Console.WriteLine("Critical hit!");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
             }
             else

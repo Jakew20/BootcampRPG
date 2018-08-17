@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Speech.Synthesis;
 
 namespace RPG
 {
@@ -15,16 +16,25 @@ namespace RPG
         public static int crit;
         public static int dodge;
         public static int Gold;
+        public static int EXP;
 
+
+        
+        //synth.SetOutputToDefaultAudioDevice();  
+        
 
         public static int attack()
         {
+            SpeechSynthesizer synth = new SpeechSynthesizer();
             var attack = 0;
             if (RandomCrit() == 3)
             {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                     attack = (Attack * 2) + RandomDamageRoll() * 2;
                     Console.WriteLine( Type + " Scored a Critical hit!");
-                
+                synth.Speak("BLAAHHHHHHHHHHHHHHHHHHHHHHHHHH");
+                Console.ForegroundColor = ConsoleColor.White;
+
             }
             else
             {

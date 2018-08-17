@@ -17,5 +17,6 @@ namespace RPG
         public static int crit = 8;
         public static int dodge = 9;
         public static int Gold = 36;
+        public static int EXP = 24;
     }
 }
