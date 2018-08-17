@@ -14,6 +14,7 @@ namespace RPG
         public static int Attack;
         public static int crit;
         public static int dodge;
+        public static int Gold;
 
 
         public static int attack()

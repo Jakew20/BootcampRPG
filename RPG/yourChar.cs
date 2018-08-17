@@ -20,19 +20,29 @@ namespace RPG
         public static int currentcount = 0;
         public static int dodge;
         public static int crit;
+        public static int FightCount = 0;
+        public static int Gold = 100;
+        
 
         public class PriestAbility
         {
+            public static int ProtManaRequired = 12;
+            public static int SmiteManaRequired = 14;
+            public static int HealManaRequired = 25;
             public static int Prot()
             {
-                currentcount = turncounter + 3;
+                if (Mana >= ProtManaRequired)
+                {
+                    currentcount = 3;
+                }
+               
                 return currentcount;
             }
 
             public static int SelfHeal()
             {
                 decimal Heal = 0;
-                if (Mana >= 25)
+                if (Mana >= HealManaRequired)
                 {
                     if (RandomCrit() == 4)
                     {
@@ -49,7 +59,7 @@ namespace RPG
             public static int Smite()
             {
                 decimal smite = 0;
-                if (Mana >= 14)
+                if (Mana >= SmiteManaRequired)
                 {
                     smite = intellect + (intellect * 2) + RandomDamageRoll();
                     Mana -= 14;
@@ -71,7 +81,98 @@ namespace RPG
         }
 
         
+        public class Potions
+        {
+            public static int HealthPotionCount = 0;
+            public static int ManaPotionCount = 0;
+            public static int RevivePotionCount = 0;
 
+            public static int HealthValue = 75;
+            public static int ManaValue = 50;
+            public static decimal ReviveValue = MaxHp/2;
+
+            public static void UsePotion()
+            {
+                Console.WriteLine("Which Potion should be used?\n");
+                Console.WriteLine("Health for " + HealthValue + " Press H");
+                Console.WriteLine("Mana for "  + ManaValue + " Press M");
+                var input = Console.ReadLine();
+                switch (input.ToUpper())
+                {
+                    case "H":
+                        CurrentHP += HealthValue;
+                        break;
+                    case "M":
+                        Mana += ManaValue;
+                        break;
+                    default:
+                        UsePotion();
+                        break;
+                }
+            }
+            public static void BuyHealthPotion()
+            {
+                if (HealthPotionCount < 5 && YourChar.Gold >= 50)
+                {
+                    HealthPotionCount += 1;
+                    Gold -= 50;
+                    Console.WriteLine("You have {0} Health potions", HealthPotionCount);
+                }
+                else
+                {
+                    if (Gold < 50)
+                    {
+                        Console.WriteLine("You don't have enough gold");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Your Already have " + HealthPotionCount + " Health potions.");
+                    }    
+                }
+            }
+
+            public static void BuyManaPotion()
+            {
+                if (ManaPotionCount < 5 && YourChar.Gold >= 50)
+                {
+                    ManaPotionCount += 1;
+                    Gold -= 50;
+                    Console.WriteLine("You have {0} Mana potions", ManaPotionCount);
+                }
+                else
+                {
+                    if (Gold < 50)
+                    {
+                        Console.WriteLine("You don't have enough gold");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Your Already have " + ManaPotionCount + " Mana potions.");
+                    }
+                }
+            }
+
+            public static void BuyRevivePotion()
+            {
+                if (RevivePotionCount < 1 && YourChar.Gold >= 100)
+                {
+                    RevivePotionCount += 1;
+                    Gold -= 100;
+                    Console.WriteLine("You have {0} Revive potions", RevivePotionCount);
+                }
+                else
+                {
+                    if (Gold < 50)
+                    {
+                        Console.WriteLine("You don't have enough gold");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Your Already have " + RevivePotionCount + " Revive potion.");
+                    }
+                }
+            }
+        }
         
       
        
@@ -99,7 +200,7 @@ namespace RPG
             }
 
            
-            return Decimal.ToInt32(attack);
+            return decimal.ToInt32(attack);
         }
 
         public static int RandomHealRoll()

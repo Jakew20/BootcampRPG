@@ -134,7 +134,7 @@ namespace RPG
             Console.WriteLine("turn: " + YourChar.turncounter);
             
             Console.WriteLine(YourChar.portrait);
-            Console.WriteLine("\nPress y to Attack, b to Block, m for Magic, and r to Run");
+            Console.WriteLine("\nPress y to Attack, b to Block, m for Magic, p To use a Potion and r to Run");
             var choice = Console.ReadLine();
 
             switch (choice)
@@ -162,8 +162,25 @@ namespace RPG
                        
                     }
                     break;
+                case "p":
+                    if (YourChar.Potions.RevivePotionCount == 1 || YourChar.Potions.ManaPotionCount > 0 ||  YourChar.Potions.HealthPotionCount > 0)
+                    {
+                        YourChar.Potions.UsePotion();
+                        damage();
+                        statCheck();
+                        DisplayAllStats();
+                        FightDecide();
+                    }
+                    else
+                    {
+                        Console.WriteLine("You possess no potions to use");
+                    }
+                    FightDecide();
+                    break;
                 case "r":
                     run();
+                    DisplayAllStats();
+                    FightDecide();
                     break;
                 default:
                     DisplayAllStats();
@@ -235,23 +252,50 @@ namespace RPG
                 switch (choice)
                 {
                     case "h":
-                        YourChar.CurrentHP += YourChar.PriestAbility.SelfHeal();
-                        if (YourChar.CurrentHP >= YourChar.MaxHp)
+                        if (YourChar.Mana >= YourChar.PriestAbility.HealManaRequired)
                         {
-                            YourChar.CurrentHP = YourChar.MaxHp;
+                            YourChar.CurrentHP += YourChar.PriestAbility.SelfHeal();
+                            if (YourChar.CurrentHP >= YourChar.MaxHp)
+                            {
+                                YourChar.CurrentHP = YourChar.MaxHp;
+                            }
+                            Console.WriteLine(YourChar.Name + " was healed for " + YourChar.PriestAbility.SelfHeal());
                         }
-                        Console.WriteLine(YourChar.Name + " was healed for " + YourChar.PriestAbility.SelfHeal());
+                        else
+                        {
+                            Console.WriteLine("You don't have enough Mana to cast this.");
+                            FightDecide();
+                        }
+
                         break;
                     case "s":
                         //var smite = YourChar.intellect + YourChar.intellect / 2;
-                        YourChar.PriestAbility.Smite();
-                        Enemy.HP -= YourChar.PriestAbility.Smite();
-                        Console.WriteLine( Enemy.Type + " was hit by Smite for " + YourChar.PriestAbility.Smite() + ". " + Enemy.Type + "'s" + " HP is now " + Enemy.HP);
-                        statCheck();
+                        if (YourChar.Mana >= YourChar.PriestAbility.SmiteManaRequired)
+                        {
+                            YourChar.PriestAbility.Smite();
+                            Enemy.HP -= YourChar.PriestAbility.Smite();
+                            Console.WriteLine(Enemy.Type + " was hit by Smite for " + YourChar.PriestAbility.Smite() + ". " + Enemy.Type + "'s" + " HP is now " + Enemy.HP);
+                            statCheck();
+                        }
+                        else
+                        {
+                            Console.WriteLine("You don't have enough Mana to cast this.");
+                            FightDecide();
+                        }
+                        
                         break;
                     case "p":
-                        YourChar.currentcount = 3;
-                        Console.WriteLine("You are protected.");
+                        if (YourChar.Mana >= YourChar.PriestAbility.ProtManaRequired)
+                        {
+                            YourChar.PriestAbility.Prot();
+                            Console.WriteLine("You are protected.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("You don't have enough Mana to cast this.");
+                            FightDecide();
+                        }
+
                         break;
                     case "b":
                         FightDecide();
@@ -346,7 +390,7 @@ namespace RPG
                 default:
                     break;
             }
-            Console.WriteLine("\nYou run into a " + Enemy.Type);
+            Console.WriteLine("\nYou encounter the " + Enemy.Type);
         }
 
         public static void run()
@@ -359,16 +403,12 @@ namespace RPG
                 Console.WriteLine("You ran away successfully");
                 Console.ReadKey();
                 EnemyBuild(RandomEncounter(num, enemy));
-                DisplayAllStats();
-                FightDecide();
             }
             else
             {
                 Console.WriteLine("You were unable to run!");
                 damage();
                 Console.ReadKey();
-                DisplayAllStats();
-                FightDecide();
             }
            
         
@@ -420,10 +460,21 @@ namespace RPG
         {
             var enemy = "";
             var num = 0;
+            GoldAddition();
+            Random rnd = new Random();
+            int Ran = rnd.Next(3, 6);
             Console.WriteLine("You win!");
             YourChar.turncounter = 1;
+            YourChar.FightCount += 1;
             Console.ReadKey();
             ClearScreen();
+            if (YourChar.FightCount == Ran)
+            {
+                ClearScreen();
+                Console.WriteLine("You encounter a store!");
+                Console.ReadKey();
+                Store();
+            }
             characterStats();
             EnemyBuild(RandomEncounter(num, enemy));
             FightDecide();
@@ -434,6 +485,12 @@ namespace RPG
 
         public static void Loss()
         {
+            if (YourChar.Potions.RevivePotionCount == 1)
+            {
+                YourChar.CurrentHP = YourChar.Potions.ReviveValue;
+                YourChar.Potions.RevivePotionCount -= 1;
+                FightDecide();
+            }
             Console.WriteLine("You Loss");
             Console.ReadKey();
         }
@@ -451,6 +508,56 @@ namespace RPG
         public static void ClearScreen()
         {
             Console.Clear();
+        }
+
+        public static void Store()
+        {
+            ClearScreen();
+            Console.WriteLine("Welcome to the store!\n");
+            Console.WriteLine("You have {0} Gold to spend", YourChar.Gold);
+            Console.WriteLine("What would you like to purchase?");
+            Console.WriteLine("Mana Potion - 50G Restores {0} Mana Press M", YourChar.Potions.HealthValue);
+            Console.WriteLine("Health Potion - 50G Restores {0} Health Press H", YourChar.Potions.ManaValue);
+            Console.WriteLine("Revive Potion - 100G Revives your character upon death to half their Max HP Press R");
+            Console.WriteLine("Press B to Leave");
+            var input = Console.ReadLine();
+            Purchasing(input.ToString().ToUpper());
+        }
+
+        public static void GoldAddition()
+        {
+            YourChar.Gold += Enemy.Gold;
+        }
+
+        public static void Purchasing(string input)
+        {
+            var enemy = "";
+            var num = 0;
+            switch (input)
+            {
+                case "H":
+                    YourChar.Potions.BuyHealthPotion();
+                    Console.ReadKey();
+                    Store();
+                    break;
+                case "M":
+                    YourChar.Potions.BuyManaPotion();
+                    Console.ReadKey();
+                    Store();
+                    break;
+                case "R":
+                    YourChar.Potions.BuyRevivePotion();
+                    Console.ReadKey();
+                    Store();
+                    break;
+                case "B":
+                    ClearScreen();
+                    characterStats();
+                    EnemyBuild(RandomEncounter(num, enemy));
+                    FightDecide();
+                    Console.ReadKey();
+                    break;
+            }
         }
     }
 }

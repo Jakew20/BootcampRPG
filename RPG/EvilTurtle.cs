@@ -16,5 +16,6 @@ namespace RPG
         public static int intellect = 17;
         public static int crit = 16;
         public static int dodge = 20;
+        public static int Gold = 20;
     }
 }
